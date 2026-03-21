@@ -1592,10 +1592,15 @@ func (c *converter) convertInlineContainer(n *html.Node, style computedStyle) []
 	if len(runs) == 0 {
 		return nil
 	}
-	p := layout.NewStyledParagraph(runs...)
-	p.SetAlign(style.TextAlign)
-	p.SetLeading(style.LineHeight)
-	return []layout.Element{p}
+	var elems []layout.Element
+	for _, group := range splitRunsAtBr(runs) {
+		if len(group) == 0 {
+			continue
+		}
+		p := c.buildParagraphFromRuns(group, style)
+		elems = append(elems, p)
+	}
+	return elems
 }
 
 // convertList handles <ul> and <ol> elements, including nested lists.
